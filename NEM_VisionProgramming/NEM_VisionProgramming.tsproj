@@ -1135,6 +1135,9 @@
 				<Task Id="2" Priority="5" CycleTime="100000" AmsPort="350" AdtTasks="true">
 					<Name>VnTask ImgAcq (FileSource1)</Name>
 				</Task>
+				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="351" Affinity="#x00002000" AdtTasks="true">
+					<Name>VisionTask</Name>
+				</Task>
 			</Tasks>
 		</System>
 		<Vision>
