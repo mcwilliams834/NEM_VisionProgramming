@@ -289,6 +289,131 @@ IF bNewImageIn THEN
 	END_IF
 
 //LAB 3-2 END
+
+//LAB 4 START
+	//set ROI  --REGION OF INTEREST IS IMPORTANT FOR SPEEDING UP YOUR VISION PROGRAM
+	IF bROI THEN
+		aOffsetROI[0] := REAL_TO_DINT(PuckCenter[0]);
+		aOffsetROI[1] := REAL_TO_DINT(PuckCenter[1]);
+		aOffsetROIDraw[0] := aOffsetROI[0] - (aOffsetROISize[0]/2);
+		aOffsetROIDraw[1] := aOffsetROI[1] - (aOffsetROISize[1]/2);		
+		hr := F_VN_SetROI(aOffsetROI[0]-(aOffsetROISize[0]/2), aOffsetROI[1]-(aOffsetROISize[1]/2), aOffsetROISize[0],aOffsetROISize[1], ipImageWork,hr);
+	END_IF
+	
+	//create a black and white image for the Contour detection
+	hrWD_Threshold := F_VN_StartRelWatchdog(tStop_Threshold, hr);	
+		hrThreshold := F_VN_Threshold(
+		ipSrcImage      :=  ipImageWork,
+		ipDestImage     :=  ipImageThreshold,
+		fThreshold      :=  fThreshold,
+		fMaxValue       :=  255, // max value of 8-bit image: (2^8)-1=255
+		eThresholdType  :=  eThresholdType,
+		hrPrev          :=  hr);
+	hrWD_Threshold := F_VN_StopWatchdog(hrWD_Threshold, nFractionProcessed=>nFraction_Threshold, tRest=>tRest_Threshold);
+	hr := F_VN_CopyIntoDisplayableImage(ipImageThreshold,ipImageThresDisp,hrThreshold);
+	
+	//reset the ROI
+	IF bROI THEN
+		hr := F_VN_ResetROI(ipImageWork, hr);
+	END_IF
+	
+	//clean up the image
+	hrWD_Filter := F_VN_StartRelWatchdog(tStop_Filter, hr);
+	hrMorph := F_VN_MorphologicalOperator(
+		ipSrcImage              :=  ipImageThreshold,
+		ipDestImage             :=  ipImageFilter,
+		eOperator               :=  eOperator,
+		ipStructuringElement    :=  ipElement,
+		hrPrev                  :=  hr);
+	hrWD_Filter := F_VN_StopWatchdog(hrWD_Filter, nFractionProcessed=>nFraction_Filter, tRest=>tRest_Filter);	
+		hr := F_VN_CopyIntoDisplayableImage(ipImageFilter,ipImageFilterDisp,hr);
+
+		
+	//find all the inner contours in the image		
+	hrWD_Contour := F_VN_StartRelWatchdog(tStop_Contour, hr);	
+(*
+		//only finds the outside contour
+		hrContour := F_VN_FindContours(
+			ipSrcImage				:=	ipImageFilter, 
+			ipContours				:=	ipInnercontourList,
+			hrPrev					:=	hr);		
+*)
+
+		//finds all the contours, requires running through the contour list (Iterators) and filtering with F_VN_ContourArea
+		hrContour := F_VN_FindContoursExp(
+			ipSrcImage			:= ipImageFilter,
+			ipContours			:= ipInnerContourList,
+			eRetrievalmode		:= TCVN_CRM_LIST,
+			eApproximationMethod:= 1,
+			aOffset				:= aOffsetContour,
+			hrPrev				:= hr);
+			
+		
+(*
+		
+		//finds all contours based on filter settings
+		hrContour := F_VN_DetectBlobs(
+			ipSrcImage			:=	ipImageFilter,
+			ipBlobContours		:= 	ipInnerContourList,
+			stParams			:= 	stBlobParamsInner,
+			hrPrev				:=	hr);
+*)
+	hrWD_Contour := F_VN_StopWatchdog(hrWD_Contour, nFractionProcessed=>nFraction_Contour, tRest=>tRest_Contour);
+
+	hr := F_VN_GetNumberOfElements(ipInnerContourList, nNumOfElemInner, S_OK);	
+	hr := F_VN_GetForwardIterator(ipInnerContourList, ipIterator, hr);
+		WHILE SUCCEEDED(hr) AND_THEN ipIterator.CheckIfEnd() <> S_OK DO
+					
+			// Extract the next contour from the list of contours
+			hr := F_VN_GetContainer(ipIterator, ipInnerContour, hr);
+			hr := F_VN_IncrementIterator(ipIterator, hr);
+			
+			//get the contour area
+			hr := F_VN_ContourArea(ipInnerContour, fArea, hr);
+			
+			IF fArea > 5000  AND fArea < 120000 THEN	
+				// If area is between 1000 and 120000 px square then draw the contour
+				IF bROI THEN
+					hrDraw := F_VN_DrawContoursExp(ipInnercontour,0, ipImageResult, aColorGreen,3, 0, 0,0,aOffsetROIDraw,hr);		
+				ELSE
+					hrDraw := F_VN_DrawContours(ipInnercontour, 0, ipImageResult, aColorGreen, 3, hr);
+				END_IF	
+
+				hrMatch := F_VN_MatchContours(ipInnerContour, ipCompareContour,3,fDissimilarity, hrDraw);
+				
+				IF fDissimilarity < 0.01 AND NOT bMatch THEN
+					bMatch := TRUE;
+				END_IF
+				
+			ELSE
+				
+				//draw the other contours in a different color
+				IF bROI THEN
+					hrDraw := F_VN_DrawContoursExp(ipInnercontour,0, ipImageResult, aColorBlue,3, 0, 0,0,aOffsetROIDraw,hr);		
+				ELSE
+					hrDraw := F_VN_DrawContours(ipInnercontour,	0, ipImageResult, aColorBlue, 3, hr);
+				END_IF
+			END_IF
+						
+		END_WHILE
+
+
+		IF bMatch THEN
+			hrDraw := F_VN_PutText('PASS', ipImageResult, 100, 100, 4, 2, aColorWhite, hrMatch);
+			bMatch := FALSE;
+		ELSE
+			hrDraw := F_VN_PutText('FAIL', ipImageResult, 100, 100, 4, 2, aColorWhite, hrMatch);	
+		END_IF
+		
+		CPUTime(cpuCntLoDW => udEndtime);
+		
+		sTime := UDINT_TO_STRING((udEndTime-udStartTime)/10000);
+		hrDraw := F_VN_PutText(sTime, ipImageResult, 100,200,4,2, aColorWhite,hrDraw);
+		
+		hr := F_VN_CopyIntoDisplayableImage(ipImageResult,ipImageResultDisp,hrDraw);
+		
+//LAB 4 END
+
 END_IF]]></ST>
     </Implementation>
     <LineIds Name="FB_Camera">
@@ -298,6 +423,10 @@ END_IF]]></ST>
       <LineId Id="9" Count="0" />
       <LineId Id="245" Count="46" />
       <LineId Id="244" Count="0" />
+      <LineId Id="425" Count="0" />
+      <LineId Id="427" Count="121" />
+      <LineId Id="426" Count="0" />
+      <LineId Id="424" Count="0" />
       <LineId Id="292" Count="0" />
     </LineIds>
   </POU>
