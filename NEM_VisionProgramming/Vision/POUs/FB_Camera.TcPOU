@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Camera" Id="{a541b016-bf05-4d4a-a2b6-a489256debc2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Camera
+VAR
+	fbCamera : FB_VN_SimpleCameraControl;
+	
+	eState				:	Tc3_Vision.ETcVnCameraState;
+
+//HResult
+	{attribute 'displaymode':='hex'}
+	hr					: 	HResult;
+	{attribute 'displaymode':='hex'}
+	hrWD_LocatePuck		:	HResult;
+	{attribute 'displaymode':='hex'}
+	hrLocatePuck		:	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrDraw				: 	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrCircle			:	HResult;
+	{attribute 'displaymode':='hex'}
+	hrWD_Threshold		:	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrThreshold			:	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrWD_Filter			:	HResult;	
+	{attribute 'displaymode':='hex'}	
+	hrFilter			:	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrMorph				: 	HResult;
+	{attribute 'displaymode':='hex'}
+	hrWD_Contour		: 	HResult;
+	{attribute 'displaymode':='hex'}	
+	hrContour			: 	HResult;
+	{attribute 'displaymode':='hex'}
+	hrMatch				:	HResult;
+		
+// Colors	 
+	aColorWhite			: 	TcVnVector4_LREAL := [255, 255, 255];
+	aColorBlack			: 	TcVnVector4_LREAL := [0, 0, 0];
+	aColorGreen			: 	TcVnVector4_LREAL := [0, 175, 0];
+	aColorBlue			: 	TcVnVector4_LREAL := [0, 0, 255];
+	aColorRed			: 	TcVnVector4_LREAL := [255, 0, 0];
+	aColorMagenta		: 	TcVnVector4_LREAL := [255, 0, 255];
+	
+//images
+	ipImageIn			:	ITcVnImage;
+	ipImageWork			:	ITcVnImage;
+	ipImageThreshold	:	ITcVnImage;	
+	ipImageFilter		:	ITcVnImage;
+	ipImageResult		:	ITcVnImage;
+	
+	ipImageInDisp		:	ITcVnDisplayableImage;
+	ipImageWorkDisp		:	ITcVnDisplayableImage;
+	ipImageThresDisp	:	ITcVnDisplayableImage;
+	ipImageFilterDisp	:	ITcVnDisplayableImage;
+	ipImageResultDisp	:	ITcVnDisplayableImage;
+	
+//Containers
+	ipBlobContourPuckList: 	ITcVnContainer;
+	ipInnercontourList	:	ITcVnContainer;	
+	
+//Contours
+	ipPuckContour		: 	ITcVnContainer;
+	ipInnerContour		:	ITcVnContainer;
+	ipCompareContour	:	ITcVnContainer;
+	
+//iterators
+	ipIterator			:	ITcVnForwardIterator;
+	
+//Blob parameters
+	stBlobParamsPuck	: 	TcVnParamsBlobDetection;
+	stBlobParamsInner	:	TcVnParamsBlobDetection;
+
+//Watchdog variables
+	tStop_LocatePuck	: 	DINT;
+	nFraction_Locate	: 	UDINT;
+	tRest_Locate		: 	DINT;
+
+	tStop_Threshold		: 	DINT;
+	nFraction_Threshold	: 	UDINT;
+	tRest_Threshold		: 	DINT;
+
+	tStop_filter		:	DINT;
+	nFraction_Filter	:	UDINT;
+	tRest_Filter		:	DINT;
+	
+	tStop_Contour		: 	DINT;
+	nFraction_Contour	: 	UDINT;
+	tRest_Contour		: 	DINT;
+
+	
+//Puck variables
+	nNumOfElemPuck		: 	ULINT;
+	PuckCenter			: 	TcVnPoint2_REAL;
+	PuckRadius			: 	REAL;
+	
+//Threshold variables
+	fThreshold			: 	LREAL;
+	eThresholdType		: 	ETcVnThresholdType;
+	
+//Morph variables
+	eOperator			: 	ETcVnMorphologicalOperator;
+	ipElement			: 	ITcVnImage;
+	eSEShape			: 	ETcVnStructuringElementShape;
+	aSESize				: 	ARRAY [0..1] OF UDINT;
+
+//Compare containers
+	fbLoadContour		:	FB_VN_ReadContainer; //used to load the contour to compare to
+	fDissimilarity		: 	LREAL;
+
+//ROI settings
+	bROI				: 	BOOL;
+	aOffsetROI 			: 	TcVnPoint2_DINT;
+	aOffsetROISize 		: 	TcVnPoint2_DINT := [460,460];
+	aOffsetROIDraw 		: 	TcVnPoint2_DINT;
+
+//Timetracking
+	CPUTime 			: 	GETCPUCOUNTER;
+	udStartTime			: 	UDINT;
+	udEndTime			: 	UDINT;
+	sTime				: 	STRING;
+	
+//Other Variables
+	bFirstScan			: 	BOOL := TRUE;		
+	bNewImageIn			: 	BOOL;				//check if there is a new image
+	nImageCount			: 	LINT;
+	fArea				: 	LREAL;
+	aOffsetContour		: 	TcVnPoint;
+	sPassString			: 	STRING;
+	bMatch				: 	BOOL;
+	nNumOfElemInner		: 	ULINT;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//LAB 2 START
+bNewImageIn := FALSE;
+
+eState := fbCamera.GetState();
+
+CASE eState OF
+
+	ETcVnCameraState.TCVN_CS_ERROR:
+		hr := fbCamera.Reset();		
+
+
+	ETcVnCameraState.TCVN_CS_INITIAL,
+	ETcVnCameraState.TCVN_CS_INITIALIZING,
+	ETcVnCameraState.TCVN_CS_INITIALIZED,
+	ETcVnCameraState.TCVN_CS_OPENING, 
+	ETcVnCameraState.TCVN_CS_OPENED, 
+	ETcVnCameraState.TCVN_CS_STARTACQUISITION:
+		hr := fbCamera.StartAcquisition();
+	
+	ETcVnCameraState.TCVN_CS_ACQUIRING,
+	ETcVnCameraState.TCVN_CS_TRIGGERING:
+		hr := fbCamera.GetCurrentImage(ipImageIn); // get image from buffer thats stored in ipImageIn
+		IF SUCCEEDED(hr) AND ipImageIn <> 0 THEN
+			nImageCount := nImageCount +1;
+			bNewImageIn := TRUE;
+		END_IF
+		IF eState = 9 THEN		//triggering
+			hr := fbCamera.TriggerImage();
+			// After a Software Trigger, Camera enters Triggering Mode and acquires and sends an image
+			// The Software Trigger must be called again to complete the transition back to Acquiring mode
+			// This also applies to the File Source Control when in Trigger mode
+		END_IF
+
+END_CASE
+
+IF bNewImageIn THEN
+	
+	CPUTime(cpuCntLoDW => udStarttime);
+//Image Manipulation
+	//Copy image into displayable image
+	hr := F_VN_CopyIntoDisplayableImage(ipImageIn,ipImageInDisp,hr);
+
+
+	//Copy image to new image to write results in
+	hr := F_VN_CopyImage(ipImageIn, ipImageResult,hr);
+END_IF
+//LAB 2 END]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Camera">
+      <LineId Id="138" Count="45" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

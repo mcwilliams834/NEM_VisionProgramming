@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="VisionProgram" Id="{4e1ae225-1f58-4af9-b633-a5d65bcb7583}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM VisionProgram
+VAR
+	fbCamera1 : FB_Camera;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbCamera1();]]></ST>
+    </Implementation>
+    <LineIds Name="VisionProgram">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1145,15 +1145,48 @@
 		</System>
 		<Plc>
 			<Project GUID="{40ACBFB8-71FC-4A52-A19C-6230AF64DF47}" Name="Vision" PrjFilePath="Vision\Vision.plcproj" TmcFilePath="Vision\Vision.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{74435260-ED89-ADE5-BB52-9B4895748E88}">
 					<Name>Vision Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>
 						<Context>
+							<Id>0</Id>
+							<Name>VisionTask</Name>
+							<ManualConfig>
+								<OTCID>#x02010030</OTCID>
+							</ManualConfig>
+							<Priority>1</Priority>
+							<CycleTime>1000000</CycleTime>
+						</Context>
+						<Context>
 							<Id>1</Id>
-							<Name>Default</Name>
+							<Name>PlcTask</Name>
+							<ManualConfig>
+								<OTCID>#x02010050</OTCID>
+							</ManualConfig>
+							<Priority>20</Priority>
+							<CycleTime>10000000</CycleTime>
 						</Context>
 					</Contexts>
+					<InitSymbols>
+						<InitSymbol>
+							<Name>VisionProgram.fbCamera1.fbCamera.oidITcVnImageProvider</Name>
+							<Type GUID="{18071995-0000-0000-0000-00000000000F}">OTCID</Type>
+							<Comment><![CDATA[ Internal reference to the corresponding TcVnImageProvider TcCOM module ID, which needs to be set via TC init symbol. ]]></Comment>
+							<AreaNo>#x00000003</AreaNo>
+							<Data>30000101</Data>
+							<Properties>
+								<Property>
+									<Name>TcCategoryOID</Name>
+									<Value>TcVnImageProvider</Value>
+								</Property>
+							</Properties>
+						</InitSymbol>
+					</InitSymbols>
+					<TaskPouOids>
+						<TaskPouOid Prio="1" OTCID="#x08502001"/>
+						<TaskPouOid Prio="20" OTCID="#x08502002"/>
+					</TaskPouOids>
 				</Instance>
 			</Project>
 		</Plc>

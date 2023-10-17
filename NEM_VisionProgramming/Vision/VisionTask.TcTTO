@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Task Name="VisionTask" Id="{6a56db93-b225-40f5-a08a-053fa6eb0940}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>1</Priority>
+    <PouCall>
+      <Name>VisionProgram</Name>
+    </PouCall>
+    <TaskFBGuid>{f470e096-66ae-4553-afd0-3efcb711168a}</TaskFBGuid>
+    <Fb_init>{9c17b16a-7cfb-4b7a-9806-b0644e3883d1}</Fb_init>
+    <Fb_exit>{4b7a850e-71bf-4e91-93f4-d9db689774e8}</Fb_exit>
+    <CycleUpdate>{69f4f595-6f6c-4352-98c5-2c5e8b026554}</CycleUpdate>
+    <PostCycleUpdate>{e0c2f1ee-a09e-4290-8540-3cb6ce3da6ce}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>
