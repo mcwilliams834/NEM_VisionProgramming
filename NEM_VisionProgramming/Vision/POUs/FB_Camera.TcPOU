@@ -177,7 +177,7 @@ IF bFirstScan THEN
 		hrPrev                  :=  hr);
 
 	fbLoadContour(
-		sFilePath:= 'C:\EngineeringWeek2023 Vision/Arm.xml', 
+		sFilePath:= 'C:\EngineeringWeek2023 Vision\EngineeringWeek2023 Vision\Arm.xml', 
 		ipDestContainer:= ipCompareContour, 
 		nDestTypeGuid:= , 
 		bRead:= TRUE, 
