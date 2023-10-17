@@ -239,14 +239,64 @@ IF bNewImageIn THEN
 
 	//Copy image to new image to write results in
 	hr := F_VN_CopyImage(ipImageIn, ipImageResult,hr);
-END_IF
-//LAB 2 END]]></ST>
+//END_IF
+//LAB 2 END
+
+//LAB 3-2 START	
+	//turn image into a grayscale image
+	hr := F_VN_ConvertColorSpace(ipImageIn, ipImageWork, TCVN_CST_RGB_TO_GRAY, hr);
+	hr := F_VN_CopyIntoDisplayableImage(ipImageWork,ipImageWorkDisp,hr);
+	
+	//find the whole puck
+	hrWD_LocatePuck := F_VN_StartRelWatchdog(tStop_LocatePuck, hr);
+		hrLocatePuck := F_VN_DetectBlobs(
+			ipSrcImage		:= ipImageWork,
+			ipBlobContours	:= ipBlobContourPuckList,
+			stParams		:= stBlobParamsPuck,
+			hrPrev			:= hr);
+	hrWD_LocatePuck := F_VN_StopWatchdog(hrWD_LocatePuck, nFractionProcessed=>nFraction_Locate, tRest=>tRest_Locate);
+
+	hr := F_VN_GetNumberOfElements(ipBlobContourPuckList, nNumOfElemPuck, S_OK);
+	
+	IF nNumOfElemPuck > 0 THEN
+		
+		
+		
+		
+		//F_VN_GetAt.. (Get a single oontour out of a container)
+
+		hr := F_VN_GetAt_ITcVnContainer(
+			ipSrcContainer		:= ipBlobContourPuckList,
+			ipDestContainer		:= ipPuckContour,
+			nIndex				:= 0,		//first contour out of the container
+			hrPrev				:= hr);
+		
+
+		//find enclosing circle (for center point and radius)
+		hrCircle := F_VN_EnclosingCircle(
+			ipPointSet	:= ipPuckContour,
+			aCenter		:= PuckCenter,
+			fRadius		:= PuckRadius,
+			hrPrev		:= hr);
+		
+		//draw shape and center of puck
+		hrDraw := F_VN_DrawContours(ipBlobContourPuckList, -1, ipImageResult, aColorRed, 3,hrCircle);
+		hrDraw := F_VN_DrawPointExp(REAL_TO_UDINT(PuckCenter[0]), REAL_TO_UDINT(PuckCenter[1]), ipImageResult, 2, aColorMagenta, 40, 5, 8, hrDraw);
+		hr := F_VN_CopyIntoDisplayableImage(ipImageResult,ipImageResultDisp,hrDraw);
+
+
+		
+	END_IF
+
+//LAB 3-2 END]]></ST>
     </Implementation>
     <LineIds Name="FB_Camera">
       <LineId Id="186" Count="57" />
       <LineId Id="184" Count="1" />
       <LineId Id="138" Count="45" />
       <LineId Id="9" Count="0" />
+      <LineId Id="245" Count="46" />
+      <LineId Id="244" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
