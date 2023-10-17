@@ -1138,8 +1138,25 @@
 				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="351" Affinity="#x00002000" AdtTasks="true">
 					<Name>VisionTask</Name>
 				</Task>
+				<Task Id="5" Priority="20" CycleTime="100000" AmsPort="352" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
 			</Tasks>
 		</System>
+		<Plc>
+			<Project GUID="{40ACBFB8-71FC-4A52-A19C-6230AF64DF47}" Name="Vision" PrjFilePath="Vision\Vision.plcproj" TmcFilePath="Vision\Vision.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2">
+					<Name>Vision Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Contexts>
+						<Context>
+							<Id>1</Id>
+							<Name>Default</Name>
+						</Context>
+					</Contexts>
+				</Instance>
+			</Project>
+		</Plc>
 		<Vision>
 			<JobPool Id="#x01010010" KeepUnrestoredLinks="2">
 				<Name>Vision Job Pool</Name>
