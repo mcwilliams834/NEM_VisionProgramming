@@ -1145,7 +1145,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{40ACBFB8-71FC-4A52-A19C-6230AF64DF47}" Name="Vision" PrjFilePath="Vision\Vision.plcproj" TmcFilePath="Vision\Vision.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{74435260-ED89-ADE5-BB52-9B4895748E88}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{1E570059-C9E7-A0AE-E398-F30313CD1284}">
 					<Name>Vision Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

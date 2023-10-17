@@ -288,7 +288,8 @@ IF bNewImageIn THEN
 		
 	END_IF
 
-//LAB 3-2 END]]></ST>
+//LAB 3-2 END
+END_IF]]></ST>
     </Implementation>
     <LineIds Name="FB_Camera">
       <LineId Id="186" Count="57" />
@@ -297,6 +298,7 @@ IF bNewImageIn THEN
       <LineId Id="9" Count="0" />
       <LineId Id="245" Count="46" />
       <LineId Id="244" Count="0" />
+      <LineId Id="292" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
