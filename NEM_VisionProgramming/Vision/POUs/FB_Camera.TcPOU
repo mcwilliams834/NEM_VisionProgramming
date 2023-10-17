@@ -134,7 +134,67 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//LAB 2 START
+      <ST><![CDATA[//LAB 3-1 START
+
+IF bFirstScan THEN
+
+// Blob Params for Puck Detection
+	stBlobParamsPuck.bFilterByArea			:=  TRUE;
+	stBlobParamsPuck.fMinArea       		:=  350_000;
+	stBlobParamsPuck.fMaxArea       		:=  600_000;
+	stBlobParamsPuck.bFilterByCircularity	:=  TRUE;
+	stBlobParamsPuck.fMinCircularity		:=  0.8;
+	stBlobParamsPuck.fMaxCircularity		:=  1;
+	
+//Blob Params for Inner Detection
+	stBlobParamsInner.bFilterByArea	:=  TRUE;
+	stBlobParamsInner.fMinArea       :=  30_000;
+	stBlobParamsInner.fMaxArea       :=  120_000;
+
+
+//watchdogSettings	
+	tStop_LocatePuck 						:= 	5000;
+	tStop_Threshold							:=	5000;
+	tStop_Filter							:=	5000;
+	tStop_Contour							:=	5000;
+
+//Threshold setting
+	fThreshold 								:= 	60;
+	eThresholdType 							:=	TCVN_TT_BINARY;	
+
+//Morph settings
+	eOperator 								:= 	TCVN_MO_CLOSING;
+	eSEShape 								:= 	TCVN_SES_RECTANGLE;	
+	aSESize[0]								:=	8;
+	aSESize[1]								:= 	8;
+	
+//Create element for Morph
+	hr := F_VN_CreateStructuringElement(
+		ipStructuringElement    :=  ipElement,
+		eShape                  :=  eSEShape,
+		nWidth					:=	aSESize[0],
+		nHeight					:=	aSESize[1],
+		hrPrev                  :=  hr);
+
+	fbLoadContour(
+		sFilePath:= 'C:\EngineeringWeek2023 Vision/Arm.xml', 
+		ipDestContainer:= ipCompareContour, 
+		nDestTypeGuid:= , 
+		bRead:= TRUE, 
+		nTimeout:= , 
+		bBusy=> , 
+		bError=> , 
+		nErrorId=> );
+		
+	IF NOT fbLoadContour.bBusy AND NOT fbLoadContour.bError THEN
+		fbLoadContour(sFilePath:= 'C:\TcVision_Contour_Files/Arm.xml', bRead := FALSE);	
+		bFirstScan 								:= 	FALSE;
+	END_IF
+END_IF
+
+//LAB 3-1 END
+
+//LAB 2 START
 bNewImageIn := FALSE;
 
 eState := fbCamera.GetState();
@@ -183,6 +243,8 @@ END_IF
 //LAB 2 END]]></ST>
     </Implementation>
     <LineIds Name="FB_Camera">
+      <LineId Id="186" Count="57" />
+      <LineId Id="184" Count="1" />
       <LineId Id="138" Count="45" />
       <LineId Id="9" Count="0" />
     </LineIds>
