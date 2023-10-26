@@ -1,5 +1,36 @@
-<div id="Desktop" data-tchmi-type="TcHmi.Controls.System.TcHmiView" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width-mode="Content" data-tchmi-min-width="100" data-tchmi-min-width-unit="%" data-tchmi-height-mode="Content" data-tchmi-min-height="100" data-tchmi-min-height-unit="%">
+<div id="Desktop" data-tchmi-type="TcHmi.Controls.System.TcHmiView" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width-mode="Content" data-tchmi-min-width="100" data-tchmi-min-width-unit="%" data-tchmi-height-mode="Content" data-tchmi-min-height="100" data-tchmi-min-height-unit="%" data-tchmi-creator-viewport-width="1920" data-tchmi-creator-viewport-height="1080">
   <div id="ViewDesktopBeckhoffLogo" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-src="Images/Beckhoff_Logo.svg" data-tchmi-left="20" data-tchmi-top="20" data-tchmi-width="194" data-tchmi-height="57">
 
   </div>
+<div id="TcHmiVnImage" data-tchmi-type="TcHmi.Controls.Beckhoff.Vision.TcHmiVnImage" data-tchmi-data-rate="0" data-tchmi-data-received="0" data-tchmi-draggable="true" data-tchmi-height="857" data-tchmi-height-unit="px" data-tchmi-image-rate="0" data-tchmi-image-render-time="0" data-tchmi-images-received="0" data-tchmi-left="62" data-tchmi-left-unit="px" data-tchmi-scalable="true" data-tchmi-scale="100" data-tchmi-scale-max="250" data-tchmi-scale-min="10" data-tchmi-top="193" data-tchmi-top-unit="px" data-tchmi-width="1394" data-tchmi-width-unit="px" data-tchmi-image="%s%PLC1.VisionProgram.fbCamera1.ipImageResultDisp.bmp%/s%">
+<script data-tchmi-target-attribute="data-tchmi-offset" type="application/json">
+[
+  0,
+  0
+]
+</script>
+<script data-tchmi-target-attribute="data-tchmi-view" type="application/json">
+[
+  0,
+  0,
+  0,
+  0
+]
+</script>
+<script data-tchmi-target-attribute="data-tchmi-pixel-color-format" type="application/json">
+{
+  "objectType": "Function",
+  "fn": "PixelColorFormatter",
+  "fnParams": []
+}
+</script>
+<script data-tchmi-target-attribute="data-tchmi-shape-value-format" type="application/json">
+{
+  "objectType": "Function",
+  "fn": "ShapeValueFormatter",
+  "fnParams": []
+}
+</script>
+
+</div>
 </div>
